@@ -1,4 +1,7 @@
 <?php 
+
+// protection against SQL injection
+// makes it easier to get things where we want them
 class DB {
     // _ lets us know these properties are private -not- public
     private static $_instance = null; # instance of database if available
@@ -50,8 +53,40 @@ class DB {
             }
         }
     }
+    
+    public function action($action, $table, $where = array()) {
+        if(count($where) === 3) { // we need a field, operator, value
+            $operators = array('=', '>', "<", ">=", "<=");
+
+            $field      = $where[0];
+            $operator   = $where[1];
+            $value      = $where[2];
+
+            // operator inside array
+            if (in_array($operator, $operators)) {
+                $sql = "{$action} * FROM {$table} WHERE {$field} {$operator} ?";
+                if (!$this->_query($sql, array($value))) { // if there's not an error
+                    return $this;
+                }
+            }
+        }
+        return false;
+    }
+
+    // shortcut 
+    public function get($table, $where) {
+        return $this->action('SELECT *', $table, $where);
+    }
+
+    public function delete($table, $where) {
+        return $this->action('DELETE', $table, $where);
+    }
 
     public function error() { // returns true if error is present
         return $this->_error;
+    }
+
+    public function count() { 
+        return $this->_count;
     }
 }
