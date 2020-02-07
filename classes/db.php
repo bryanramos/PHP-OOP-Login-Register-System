@@ -82,6 +82,14 @@ class DB {
         return $this->action('DELETE', $table, $where);
     }
 
+    public function results() { 
+        return $this->_results;
+    }
+
+    public function first() { // return first result
+        return $this->_results()[0];
+    }
+
     public function error() { // returns true if error is present
         return $this->_error;
     }
